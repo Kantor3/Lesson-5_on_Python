@@ -9,8 +9,8 @@ test_data = [["3 4 5 6 7 9 10 11 12 14", 8],
 """
 
 
-def get_data_file(name_file):
-    with open(name_file, 'r', encoding='utf8') as f:
+def get_data_file(name_fil):
+    with open(name_fil, 'r', encoding='utf8') as f:
         l_str = f.readlines()
     return l_str
 
@@ -21,17 +21,16 @@ def get_data_file(name_file):
 # ====================================================================================
 '''
 
-if __name__ == '__main__':
-    print('Ищем недостающие элементы в последовательностях чисел, загруженных из файла.'
-          '\nНедостающие элементы указаны через стрелку (->):')
+print('Ищем недостающие элементы в последовательностях чисел, загруженных из файла.'
+      '\nНедостающие элементы указаны через стрелку (->):')
 
-    name_file = "file_35.txt"
-    l_series = list(map(lambda el: el.replace("\n", ""), get_data_file(name_file)))
+name_file = "file_35.txt"
+l_series = map(lambda el: el.replace("\n", ""), get_data_file(name_file))
 
-    curr_sers = lambda lst: list(map(int, lst.split()))
-    recurrent = lambda els: 0 if els[1] == els[0] + 1 else els[0] + 1
-    nearby_el = lambda lst: map(recurrent, zip(lst[:-1], lst[1:]))
-    els_misng = lambda lst: tuple(filter(lambda el: el, nearby_el(lst)))
-    missing = [f'{el} -> {els_misng(curr_sers(el))}' for el in l_series]
+curr_sers = lambda lst: list(map(int, lst.split()))
+recurrent = lambda els: 0 if els[1] == els[0] + 1 else els[0] + 1
+nearby_el = lambda lst: map(recurrent, zip(lst[:-1], lst[1:]))
+els_misng = lambda lst: tuple(filter(lambda el: el, nearby_el(lst)))
+missing = [f'{el} -> {els_misng(curr_sers(el))}' for el in l_series]
 
-    print(*missing, sep='\n')
+print(*missing, sep='\n')
