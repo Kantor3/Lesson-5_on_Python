@@ -130,19 +130,20 @@ def is_winnings(board_st):
     for stat, numb, _ in multi_for((board_st, trans(board_st)), (1, 2), (None, None)):
         cod_win = get_cod(stat, numb)
         if cod_win: break
+    else:
+        # Проверяем наличие выигрышного фрагмента на диагоналях (сложный фрагмент кода)
+        for board, slash, numb in multi_for((1, 2), (1, 2), (1, 2)):
+            stat = diagonals(board_st, board, slash)
+            cod_win = get_cod(stat, numb)
+            if cod_win: break
+        else:
+            # Проверяем наличие на доске ничьи
+            if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
+                return 0                        # на доске ничья
 
-    # Проверяем наличие выигрышного фрагмента на диагоналях (сложный фрагмент кода)
-    # if not cod_win:
-    for board, slash, numb in multi_for((1, 2), (1, 2), (1, 2)):
-        stat = diagonals(board_st, board, slash)
-        cod_win = get_cod(stat, numb)
-        if cod_win: break
+    print(f'cod_win = {cod_win}')
 
-    # Проверяем наличие на доске ничьи
-    if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
-        return 0                        # на доске ничья
-
-    return None if cod_win is None else dict_rev(pin_player, signs[cod_win[0]])
+    return None if not cod_win else dict_rev(pin_player, signs[cod_win[0]])
 
 
 # 7. Показать статистику игр
