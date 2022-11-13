@@ -123,27 +123,26 @@ def is_winnings(board_st):
             for j in in2:
                 for k in in3: yield i, j, k
 
-    # Проверяем наличие на доске ничьи
-    if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
-        return 0                            # на доске ничья
-
     # Проверка наличия выигрышного фрагмента по горизонтали и вертикали игрового поля
     # для каждого кода игрового символа из словаря signs = {0: '.', 1: 'x', -1: 'o'}.
     # numb: 1-й символ - 'x', код = 1; 2-й символ - 'o', код = -1
-    cod_win = []
+    cod_win = None
     for stat, numb, _ in multi_for((board_st, trans(board_st)), (1, 2), (None, None)):
         cod_win = get_cod(stat, numb)
         if cod_win: break
 
     # Проверяем наличие выигрышного фрагмента на диагоналях (сложный фрагмент кода)
-    if not cod_win:
-        for board, slash, numb in multi_for((1, 2), (1, 2), (1, 2)):
-            stat = diagonals(board_st, board, slash)
-            cod_win = get_cod(stat, numb)
-            if cod_win: break
-        else:
-            return None                     # игра не закончена (нет победителей или ничьи)
-    return dict_rev(pin_player, signs[cod_win[0]])
+    # if not cod_win:
+    for board, slash, numb in multi_for((1, 2), (1, 2), (1, 2)):
+        stat = diagonals(board_st, board, slash)
+        cod_win = get_cod(stat, numb)
+        if cod_win: break
+
+    # Проверяем наличие на доске ничьи
+    if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
+        return 0                        # на доске ничья
+
+    return None if cod_win is None else dict_rev(pin_player, signs[cod_win[0]])
 
 
 # 7. Показать статистику игр
@@ -219,31 +218,33 @@ size_min, size_max = 3, 8               # Допустимые размеры д
 n_games, wins_pl1, wins_pl2 = 0, 0, 0   # Количество сыгранных раундов игры и выигрышей игроками
 
 print('\nСыграем в крестики-нолики?', end='')
+new = True
+player_my = None
 while True:
 
-    if myl.check_exit(txt_req='("Y" - ДА) -> '):
-        break
+    if new:         # Уточнение параметров игры (размер доски, число фишек в линии для выигрыша)
+        if myl.check_exit(txt_req='("Y" - ДА) -> '):
+            break
 
-    # Уточнение параметров игры (размер доски, число фишек в линии для выигрыша)
-    size_board = myl.get_InputNumber(size_min, size_max, default=3, txt='\nВыберите размер доски (от 3 до 8)', end='-')
-    if myl.check_exit(size_board):
-        break
-    numb_XO = myl.get_InputNumber(size_min, size_board, default=3,
-                                  txt=f'Укажите число фишек в линию для выигрыша '
-                                      f'(от {size_min} до {max(size_min, size_board - 1)})', end='-')
-    if myl.check_exit(numb_XO):
-        break
+        size_board = myl.get_InputNumber(size_min, size_max, default=3, txt='\nВыберите размер доски (от 3 до 8)', end='-')
+        if myl.check_exit(size_board):
+            break
+        numb_XO = myl.get_InputNumber(size_min, size_board, default=3,
+                                      txt=f'Укажите число фишек в линию для выигрыша '
+                                          f'(от {size_min} до {max(size_min, size_board - 1)})', end='-')
+        if myl.check_exit(numb_XO):
+            break
 
-    # 1. Выбрать игрока ("1" - Игрок-1; "2" - Игрок-2")
-    # 2. Выбрать значок ("х" иди "о")
-    player_my, pin = myl.get_InputTuple(
-        ((str(player_one), str(player_two)), player_one, 'Выберите номер игрока, за которого вы будете играть (1 или 2)'),
-        (('x', 'o'), 'x', 'Выберите свой символ для игры ("x" или "o" - в латинице)'), type_input=tuple, end='-')
-    player_my = int(player_my)
-    pin_cod = dict_rev(signs, pin)
-    pin_player = dict([(player_my, signs[pin_cod]), (player_one + player_two - player_my, signs[3-pin_cod])])
-    if player_my is None and myl.check_exit(player_my):
-        break
+        # 1. Выбрать игрока ("1" - Игрок-1; "2" - Игрок-2")
+        # 2. Выбрать значок ("х" иди "о")
+        player_my, pin = myl.get_InputTuple(
+            ((str(player_one), str(player_two)), player_one, 'Выберите номер игрока, за которого вы будете играть (1 или 2)'),
+            (('x', 'o'), 'x', 'Выберите свой символ для игры ("x" или "o" - в латинице)'), type_input=tuple, end='-')
+        player_my = int(player_my)
+        pin_cod = dict_rev(signs, pin)
+        pin_player = dict([(player_my, signs[pin_cod]), (player_one + player_two - player_my, signs[3-pin_cod])])
+        if player_my is None and myl.check_exit(player_my):
+            break
 
     # 3. Инициация и старт игры - показать доску:
     current_player, board_status = init_game(player_my, size_board)
@@ -290,8 +291,8 @@ while True:
                                                                   'нажмите кл. [ N ]ew -> ')
             if select_cont:
                 if isinstance(select_cont, str):
-                    # new = select_cont in special
+                    new = select_cont in special
                     break
                 exit()
 
-    print('\nВыбрано изменение варианта игры. Продолжить?')
+    if new: print('\nВыбрано изменение варианта игры. Продолжить?')
