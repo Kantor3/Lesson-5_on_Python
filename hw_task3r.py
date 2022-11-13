@@ -141,8 +141,6 @@ def is_winnings(board_st):
             if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
                 return 0                        # на доске ничья
 
-    print(f'cod_win = {cod_win}')
-
     return None if not cod_win else dict_rev(pin_player, signs[cod_win[0]])
 
 
@@ -230,6 +228,7 @@ while True:
         size_board = myl.get_InputNumber(size_min, size_max, default=3, txt='\nВыберите размер доски (от 3 до 8)', end='-')
         if myl.check_exit(size_board):
             break
+
         numb_XO = myl.get_InputNumber(size_min, size_board, default=3,
                                       txt=f'Укажите число фишек в линию для выигрыша '
                                           f'(от {size_min} до {max(size_min, size_board - 1)})', end='-')
@@ -252,7 +251,6 @@ while True:
 
     # Игра:
     while True:
-
         # 4. Показать текущее состояние игры на игровом поле (показать доску)
         show_board(board_status)
 
