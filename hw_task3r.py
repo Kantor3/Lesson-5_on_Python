@@ -2,14 +2,13 @@
 Задача 3.
 Создайте программу для игры в ""Крестики-нолики"".
 """
-# import copy                         # st = copy.deepcopy(board_status)
 import random
 from functools import reduce
 import my_Lib as myl
 
-signs = {0: '.', 1: 'x', -1: 'o'}  # словарь соответствия кодов и значков на игровом поле
+signs = {0: '.', 1: 'x', 2: 'o'}  # словарь соответствия кодов и значков на игровом поле
 
-# обращение к реверсному словарю
+# Реверсирование словаря
 dict_rev = lambda dic, key: dict([(v, k) for k, v in dic.items()])[key]
 
 
@@ -20,28 +19,23 @@ dict_rev = lambda dic, key: dict([(v, k) for k, v in dic.items()])[key]
 #    (как показно на рис.)
 def init_game(my_number, size):
     global signs
-    # signs = {0: '.', 1: 'x', -1: 'o'}
     prime_player = random.randint(1, 2)
-    n_pl, win_pl1, win_pl2, board_st = 0, 0, 0, [[0] * size for _ in range(size)]
-
-    print(f'\nПервый ход за {"Вами" if prime_player == my_number else f"Игроком № {prime_player}"}')
+    board_st = [[0] * size for _ in range(size)]
+    print(f'\nПервый ход за {"Вами" if prime_player == my_number else f"Игроком № {prime_player}"} '
+          f'(игровой символ "{pin_player[prime_player]}")')
     print(f'Формат ввода хода - число в виде [№ строки][№ колонки], например: 21')
-    return prime_player, n_pl, win_pl1, win_pl2, board_st
+    return prime_player, board_st
 
 
 # 4. Показать текущее состояние игры на доске
-# stt = [[0, 0, -1, 1], [-1, 0, 0, 1], [0, 1, 0, 0], [0, -1, 1, 0]]
+# stt = [[0, 1, 0], [0, 2, 0], [0, 0, 0]]
 # [ell for el in stt for ell in el]
 #     -----------
 #     = 1   2   3
 #     1 . | x | .
-#     2 . | . | .
+#     2 . | o | .
 #     3 . | . | .
 def show_board(board_st):
-
-    print(f'signs -> {signs}')
-    print(f'board_st -> {board_st}')
-
     print('-----------')
     print('= 1 2 3')
     board_sign = reduce(lambda lel, el: lel + [list(map(lambda l_el: signs[l_el], el))], board_st, [])
@@ -59,19 +53,10 @@ def get_move(player, board_st):
     av_moves = tuple(filter(lambda m: not board_st[m // 10 - 1][m % 10 - 1], av_moves))
     while True:
         # Запрос хода
-        # go = myl.get_InputNumber(av_moves, txt=f'Ход игрока {player} (доступные ходы: {av_moves})', end='-')
-        # go = myl.get_InputNumber(av_moves, type_input=tuple, txt=f'Ход игрока {player}:', end='-')
-        # if not (go is None) and board_st[go // 10 - 1][go % 10 - 1]:
-        #     print(f'поле {go} занято, укажите другое поле.')
-        #     continue
-        # break
         go = myl.get_InputNumber(tuple(map(str, av_moves)), type_input=tuple, txt=f'Ход игрока {player}:', end='-')
         if go is None: break
         else: go = int(go)
-        if board_st[go // 10 - 1][go % 10 - 1]:
-            print(f'поле {go} занято, укажите другое поле.')
-            continue
-        return go  # отправка хода
+        return go               # отправка хода
 
 
 # 6. Проверить игру на завершение (выигрыш одного из игроков или ничья)
@@ -85,54 +70,27 @@ def is_winnings(board_st):
 
     # Выигравший символ (код), было: cod_win = get_cod(stat, str_cod(numb))
     def get_cod(st, number):
-
-        print(f'st = {st}')
-        print(f'number = {number}')
-
-        return [el[0] for el in st
+        return [list(signs.keys())[number] for el in st
                 if str(list(signs.keys())[number]) * numb_XO
                 in ''.join(map(str, el))]
 
     # транспонирование вложенного списка
     def trans(stt):
-        stt_t = [ell for i in range(len(stt)) for el in board_st for ell in [el[i]]]
-        return [reduce(lambda ell, el: ell + [el],
-                       stt_t[i * size_board:][:size_board], []) for i in range(size_board)]
+        stt_flat = [ell for i in range(len(stt)) for el in stt for ell in [el[i]]]
+        ret = [reduce(lambda ell, el: ell + [el],
+                      stt_flat[i * size_board:][:size_board], []) for i in range(size_board)]
+        return ret
 
     # выделение элементов, находящихся на диагоналях вложенного списка
-    def diagonals(st, b, sl):
-        bb = int((1 - b) / 2)
-        diagonal = lambda d: [[st[i - d * bb][(size_board - 1) * sl - (i + d * bb)] for i in range(d * b, size_board)]]
-        return reduce(lambda st_d, j: st_d + diagonal(j), range(0, (size_board - numb_XO + 1) * b, 1), [])
-
-    # Организация вложенных циклов, обеспечивающая возможность выхода из всех разом
-    def multi_for(*ins):
-        in1, in2, in3 = ins
-        for i in in1:
-            for j in in2:
-                for k in in3: yield i, j, k
-
-    # Проверяем наличие на доске ничьи
-    if not filter(lambda el: not el, [ell for el in board_st for ell in el]):
-        # return None  # на доске ничья!
-        return 0                            # на доске ничья
-
-    # Проверка наличия выигрышного фрагмента по горизонтали и вертикали игрового поля
-    cod_win = []
-    for stat, numb, _ in multi_for((board_st, trans(board_st)), (1, 2), (0, 0)):
-        cod_win = get_cod(stat, numb)
-
-        print(f'cod_win = {cod_win}')
-
-        if cod_win: break
-
-    # Проверяем наличие выигрышного фрагмента на диагоналях (сложный фрагмент кода)
-    # Диагонали: (начинаются с верхней границы поля)
-    # reduce(lambda st_d, j: st_d + [[st [i-j] [         i] for i in range(j, lw)]], range(0, (lw-numb_XO+1), 1), [])
-    # reduce(lambda st_d, j: st_d + [[st [i-j] [(lw-1) - i] for i in range(j, lw)]], range(0, (lw-numb_XO+1), 1), [])
-    # Диагонали: (заканчиваются на нижней границе поля)
+    # 1), 2) Для каждой группы диагоналей:
+    # Диагонали (начинаются с верхней границы поля, левый/правый наклоны)
+    #   reduce(lambda st_d, j: st_d + [[st [i-j] [         i] for i in range(j, lw)]], range(0, (lw-numb_XO+1), 1), [])
+    #   reduce(lambda st_d, j: st_d + [[st [i-j] [(lw-1) - i] for i in range(j, lw)]], range(0, (lw-numb_XO+1), 1), [])
+    # Диагонали: (заканчиваются на нижней границе поля, левый/правый наклоны)
     # reduce(lambda st_d, j: st_d + [[st [i] [         (j+i)] for i in range(-j, lw)]], range(0, -(lw-numb_XO+1), -1), [])
     # reduce(lambda st_d, j: st_d + [[st [i] [(lw-1) - (j+i)] for i in range(-j, lw)]], range(0, -(lw-numb_XO+1), -1), [])
+    # 3) для каждого кода игрового символа из словаря signs = {0: '.', 1: 'x', -1: 'o'}.
+    #    numb: 1-й символ - 'x', код = 1; 2-й символ - 'o', код = -1
     # Пример:
     # st = [[11,12,13,14], [21,22,23,24], [31,32,33,34], [41,42,43,44]]
     # print(*st, sep='\n')
@@ -140,24 +98,52 @@ def is_winnings(board_st):
     # [21, 22, 23, 24]
     # [31, 32, 33, 34]
     # [41, 42, 43, 44]
+    def diagonals(st, brd, sl):
+        cnt_d = size_board - numb_XO + 1
+        if brd == 1:                # Диагонали начинаются с верхней границы поля
+            if sl == 1:             #   наклон - левый
+                res = reduce(lambda st_d, j: st_d + [[st[i-j][i]                  for i in range(j, size_board)]],
+                             range(0, cnt_d, 1), [])
+            else:                   #   наклон - правый (if sl == 2)
+                res = reduce(lambda st_d, j: st_d + [[st[i-j][(size_board-1) - i] for i in range(j, size_board)]],
+                             range(0, cnt_d, 1), [])
+        else:                       # Диагонали заканчиваются на нижней границе поля (if brd == 2)
+            if sl == 1:             #   наклон - левый
+                res = reduce(lambda st_d, j: st_d + [[st[i][(j+i)]                  for i in range(-j, size_board)]],
+                             range(0, -cnt_d, -1), [])
+            else:                   #   наклон - правый (if sl == 2)
+                res = reduce(lambda st_d, j: st_d + [[st[i][(size_board-1) - (j+i)] for i in range(-j, size_board)]],
+                             range(0, -cnt_d, -1), [])
+        return res
+
+    # Организация вложенных циклов, обеспечивающая возможность выхода из всех циклов разом
+    def multi_for(*ins):
+        in1, in2, in3 = ins
+        for i in in1:
+            for j in in2:
+                for k in in3: yield i, j, k
+
+    # Проверяем наличие на доске ничьи
+    if not list(filter(lambda el: not el, [ell for el in board_st for ell in el])):
+        return 0                            # на доске ничья
+
+    # Проверка наличия выигрышного фрагмента по горизонтали и вертикали игрового поля
+    # для каждого кода игрового символа из словаря signs = {0: '.', 1: 'x', -1: 'o'}.
+    # numb: 1-й символ - 'x', код = 1; 2-й символ - 'o', код = -1
+    cod_win = []
+    for stat, numb, _ in multi_for((board_st, trans(board_st)), (1, 2), (None, None)):
+        cod_win = get_cod(stat, numb)
+        if cod_win: break
+
+    # Проверяем наличие выигрышного фрагмента на диагоналях (сложный фрагмент кода)
     if not cod_win:
-        for bound, slash, numb in multi_for((1, -1), (0, 1), (1, 2)):
-            stat = diagonals(board_st, bound, slash)
-
-            print(f'(bound, slash, numb) = {(bound, slash, numb)}')
-
+        for board, slash, numb in multi_for((1, 2), (1, 2), (1, 2)):
+            stat = diagonals(board_st, board, slash)
             cod_win = get_cod(stat, numb)
-
-            print(f'cod_win = {cod_win}')
-
             if cod_win: break
         else:
             return None                     # игра не закончена (нет победителей или ничьи)
-
-    print(f'pin_player = {pin_player}')
-    print(f'cod_win = {cod_win}')
-
-    return dict_rev(pin_player, cod_win)
+    return dict_rev(pin_player, signs[cod_win[0]])
 
 
 # 7. Показать статистику игр
@@ -167,7 +153,7 @@ def is_winnings(board_st):
 #    Ничьих         - D (N - x - y)
 def show_account(n_pl, win_pl1, win_pl2, win_pl, st):
     print(f'\nРаунд {n_pl}.')
-    txt_result = f'Победитель: Игрок-{win_pl}' if win_pl else 'НИЧЬЯ'
+    txt_result = f'Победитель: Игрок-{win_pl} (символ "{pin_player[win_pl]}")' if win_pl else 'НИЧЬЯ'
     print(txt_result)
     show_board(st)
     print('-----------------------')
@@ -228,8 +214,9 @@ global size_board  # размер доски для игры
 global numb_XO     # число значков ('x' или 'o') в линию для выигрыша
 global pin_player  # фишки (значки) игроков (коды фишек см. signs)
 
-player_one, player_two = 1, 2   # Номера игроков
-size_min, size_max = 3, 8       # Допустимые размеры доски
+player_one, player_two = 1, 2           # Номера игроков
+size_min, size_max = 3, 8               # Допустимые размеры доски
+n_games, wins_pl1, wins_pl2 = 0, 0, 0   # Количество сыгранных раундов игры и выигрышей игроками
 
 print('\nСыграем в крестики-нолики?', end='')
 while True:
@@ -254,14 +241,12 @@ while True:
         (('x', 'o'), 'x', 'Выберите свой символ для игры ("x" или "o" - в латинице)'), type_input=tuple, end='-')
     player_my = int(player_my)
     pin_cod = dict_rev(signs, pin)
-
-    pin_player = dict([(player_my, signs[pin_cod]), (player_one + player_two - player_my, signs[-pin_cod])])
-
+    pin_player = dict([(player_my, signs[pin_cod]), (player_one + player_two - player_my, signs[3-pin_cod])])
     if player_my is None and myl.check_exit(player_my):
         break
 
     # 3. Инициация и старт игры - показать доску:
-    current_player, n_games, wins_pl1, wins_pl2, board_status = init_game(player_my, size_board)
+    current_player, board_status = init_game(player_my, size_board)
 
     # Игра:
     while True:
@@ -276,29 +261,13 @@ while True:
 
         # 6. Обработать ход:
         #    - провести сделанный ход, обновив состояние в board_status
-
-        print(f'board_status-1 -> {board_status}')
-        print(f'move -> {move}')
-        print(f'current_player -> {current_player}')
-        print(f'pin_player -> {pin_player}')
-        print(f'pin_player[current_player] -> {pin_player[current_player]}')
-        print(f'signs -> {signs}')
-
-        # board_status[move // 10 - 1][move % 10 - 1] = pin_player[current_player]
         pin = pin_player[current_player]
-        # lev1 = move // 10 - 1
-        # lev2 = move % 10 - 1
-        # board_status[lev1][lev2] = dict_rev(signs, pin)
         board_status[move // 10 - 1][move % 10 - 1] = dict_rev(signs, pin)
-
-        print(f'board_status-2 -> {board_status}')
 
         #    - если сложилась тройка одинаковых значков на к-л строке, колонке
         #    или диагонали - игра завершена, если все поля заняты - ничья - сообщить о результате игры (п.7)
         #    иначе, устанавливаем текущего игрока и продолжаем игру (переход к п.4)
         result = is_winnings(board_status)
-
-        print(f'result -> {result}')
 
         if result is None:                              # --- Если игра не завершена
             # 9. Поменять текущего игрока, переход на шаг-4
@@ -317,7 +286,7 @@ while True:
             special = 'NnТт'
             select_cont = myl.check_exit(special=special, txt_req='\nЕще партию - нажмите кл. [ Y ]. '
                                                                   '\nЕсли желаете изменить вариант игры '
-                                                                  '(размер доски, кол. "x" или "о" в ряд победы), '
+                                                                  '(размер доски, кол. "x" или "о" в ряд для победы), '
                                                                   'нажмите кл. [ N ]ew -> ')
             if select_cont:
                 if isinstance(select_cont, str):
@@ -325,5 +294,4 @@ while True:
                     break
                 exit()
 
-
-    print('\n Выбрано изменение варианта игры. Продолжить?')
+    print('\nВыбрано изменение варианта игры. Продолжить?')
