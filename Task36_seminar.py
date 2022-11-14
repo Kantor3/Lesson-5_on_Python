@@ -12,7 +12,7 @@ test_data = [
 [1, 5, 6, 7]
 [1, 2, 3, 4, 6, 7]
 """
-import my_Lib as my
+import my_lib as my
 import random
 from functools import reduce
 
@@ -34,8 +34,8 @@ test_data = [[1, 5, 2, 3, 4, 6, 1, 7],
              [1, 2, 3, 4, 6, 1, 7]]
 
 while True:
-    series_size = my.get_InputNumber(0, txt='\nВведите число элементов исходной последовательности; '
-                                            '\n0 - будут использованы тестовые', end='-')
+    series_size = my.get_input(0, txt='\nВведите число элементов исходной последовательности; '
+                                      '\n0 - будут использованы тестовые', end='-')
     if my.check_exit(series_size):
         break
 

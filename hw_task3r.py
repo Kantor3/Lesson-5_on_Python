@@ -4,7 +4,7 @@
 """
 import random
 from functools import reduce
-import my_Lib as myl
+import my_lib as myl
 
 signs = {0: '.', 1: 'x', 2: 'o'}  # словарь соответствия кодов и значков на игровом поле
 
@@ -28,8 +28,6 @@ def init_game(my_number, size):
 
 
 # 4. Показать текущее состояние игры на доске
-# stt = [[0, 1, 0], [0, 2, 0], [0, 0, 0]]
-# [ell for el in stt for ell in el]
 #     -----------
 #     = 1   2   3
 #     1 . | x | .
@@ -53,7 +51,7 @@ def get_move(player, board_st):
     av_moves = tuple(filter(lambda m: not board_st[m // 10 - 1][m % 10 - 1], av_moves))
     while True:
         # Запрос хода
-        go = myl.get_InputNumber(tuple(map(str, av_moves)), type_input=tuple, txt=f'Ход игрока {player}:', end='-')
+        go = myl.get_input(tuple(map(str, av_moves)), type_input=tuple, txt=f'Ход игрока {player}:', end='-')
         if go is None: break
         else: go = int(go)
         return go               # отправка хода
@@ -89,15 +87,8 @@ def is_winnings(board_st):
     # Диагонали: (заканчиваются на нижней границе поля, левый/правый наклоны)
     # reduce(lambda st_d, j: st_d + [[st [i] [         (j+i)] for i in range(-j, lw)]], range(0, -(lw-numb_XO+1), -1), [])
     # reduce(lambda st_d, j: st_d + [[st [i] [(lw-1) - (j+i)] for i in range(-j, lw)]], range(0, -(lw-numb_XO+1), -1), [])
-    # 3) для каждого кода игрового символа из словаря signs = {0: '.', 1: 'x', -1: 'o'}.
-    #    numb: 1-й символ - 'x', код = 1; 2-й символ - 'o', код = -1
-    # Пример:
-    # st = [[11,12,13,14], [21,22,23,24], [31,32,33,34], [41,42,43,44]]
-    # print(*st, sep='\n')
-    # [11, 12, 13, 14]
-    # [21, 22, 23, 24]
-    # [31, 32, 33, 34]
-    # [41, 42, 43, 44]
+    # 3) для каждого кода игрового символа из словаря signs = {0: '.', 1: 'x', 2: 'o'}.
+    #    numb: 1-й символ - 'x', код = 1; 2-й символ - 'o', код = 2
     def diagonals(st, brd, sl):
         cnt_d = size_board - numb_XO + 1
         if brd == 1:                                    # Диагонали начинаются с верхней границы поля
@@ -225,19 +216,19 @@ while True:
         if myl.check_exit(txt_req='("Y" - ДА) -> '):
             break
 
-        size_board = myl.get_InputNumber(size_min, size_max, default=3, txt='\nВыберите размер доски (от 3 до 8)', end='-')
+        size_board = myl.get_input(size_min, size_max, default=3, txt='\nВыберите размер доски (от 3 до 8)', end='-')
         if myl.check_exit(size_board):
             break
 
-        numb_XO = myl.get_InputNumber(size_min, size_board, default=3,
-                                      txt=f'Укажите число фишек в линию для выигрыша '
-                                          f'(от {size_min} до {max(size_min, size_board - 1)})', end='-')
+        numb_XO = myl.get_input(size_min, size_board, default=3,
+                                txt=f'Укажите число фишек в линию для выигрыша '
+                                    f'(от {size_min} до {max(size_min, size_board - 1)})', end='-')
         if myl.check_exit(numb_XO):
             break
 
         # 1. Выбрать игрока ("1" - Игрок-1; "2" - Игрок-2")
         # 2. Выбрать значок ("х" иди "о")
-        player_my, pin = myl.get_InputTuple(
+        player_my, pin = myl.get_inputs(
             ((str(player_one), str(player_two)), player_one, 'Выберите номер игрока, за которого вы будете играть (1 или 2)'),
             (('x', 'o'), 'x', 'Выберите свой символ для игры ("x" или "o" - в латинице)'), type_input=tuple, end='-')
         player_my = int(player_my)
@@ -264,7 +255,7 @@ while True:
         pin = pin_player[current_player]
         board_status[move // 10 - 1][move % 10 - 1] = dict_rev(signs, pin)
 
-        #    - если сложилась тройка одинаковых значков на к-л строке, колонке
+        #    - если сложилась тройка (numb_XO) одинаковых значков на к-л строке, колонке
         #    или диагонали - игра завершена, если все поля заняты - ничья - сообщить о результате игры (п.7)
         #    иначе, устанавливаем текущего игрока и продолжаем игру (переход к п.4)
         result = is_winnings(board_status)

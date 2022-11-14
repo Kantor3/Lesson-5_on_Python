@@ -30,13 +30,13 @@ def check_exit(sign='YyНн', special=None, txt_req='Продолжить? ("Y" 
 
 # Организация ввода и возврат целого или вещественного числа (в т.ч. отрицательное)
 # в заданном диапазоне или выход. C полным контролем корректности
-def get_InputNumber(*rang, default=None, txt='Введите число', type_input=int, end=None, not_mess=None):
+def get_input(*rang, default=None, txt='Введите число', type_input=int, end=None, not_mess=None):
     borders = '' if len(rang) == 0 or rang[0] is None and rang[-1] is None else \
         f'{rang[0]}' if type_input == tuple else \
             f'({rang[0]} ... )' if len(rang) == 1 else \
                 f'({rang[0]} ... {rang[1]})'
 
-    txt_input = f'{txt} Возможные значения => {borders}.'
+    txt_input = f'{txt} {f"Возможные значения => {borders}." if borders else ""}'
     frm, to = (rang + (None, None))[:2]
 
     while True:
@@ -84,7 +84,7 @@ def get_InputNumber(*rang, default=None, txt='Введите число', type_i
 
 
 # Ввод нескольких элементов данных (целых чисел, строк) - Возврат введенных чисел в виде кортежа
-def get_InputTuple(*inputParams, type_input=int, end=None, not_mess=None):
+def get_inputs(*inputParams, type_input=int, end=None, not_mess=None):
     tup_iPar = tuple()
     for param in inputParams:
         if type_input == tuple:
@@ -92,10 +92,10 @@ def get_InputTuple(*inputParams, type_input=int, end=None, not_mess=None):
                 rangs = (param[0], None, param[1] if len(param) == 3 else None)
             else:
                 rangs = (param[:-1] + (None, None))[3]
-            inputParam = get_InputNumber(rangs[0], rangs[1], default=rangs[2],
+            inputParam = get_input(rangs[0], rangs[1], default=rangs[2],
                                          txt=param[-1], type_input=type_input, end=end)
         else:
-            inputParam = get_InputNumber(txt=param, type_input=type_input, end=end)
+            inputParam = get_input(txt=param, type_input=type_input, end=end)
         if inputParam is None:
             break
         tup_iPar += (inputParam,)

@@ -2,7 +2,7 @@
 Задача 1.
 Напишите программу, удаляющую из текста все слова, содержащие фрагмент ""абв"".
 """
-import my_Lib as myl
+import my_lib as myl
 
 is_fragment = lambda fr, s: s == s.replace(fr, '')
 
@@ -17,7 +17,7 @@ txt_test = 'привет абв как абвышные дела? абв'
 while True:
 
     fragment_clr = 'абв'
-    txt, fragment = myl.get_InputTuple('Введите любой текст (или "*" для тестирования)',
+    txt, fragment = myl.get_inputs('Введите любой текст (или "*" для тестирования)',
                                        'Введите фрагмент, слова содержащие который, нужно удалить',
                                        type_input=str, end='-')
     if txt is None and myl.check_exit(txt):

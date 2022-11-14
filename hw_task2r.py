@@ -12,7 +12,7 @@ b) Подумайте как наделить бота ""интеллектом"
 """
 import time
 import random
-import my_Lib as myl
+import my_lib as myl
 
 count_candies, can_removed, players_game = 0, 0, {}
 bot_thinking, bot_strategy = 3, None                # Бот будет "думать" 3 сек. Стратегию определим при инициации
@@ -38,18 +38,18 @@ def init_game(init_count=None, init_removed=None, series=None, new_set=True):
         # Уточнение параметров игры:
         if new_set:
             #   - число конфет
-            count_candies = myl.get_InputNumber(10, 3000, default=init_count,
-                                                txt=f'Укажите число конфет для игры '
-                                                    f'(по умолчанию - {init_count})', end='-')
+            count_candies = myl.get_input(10, 3000, default=init_count,
+                                          txt=f'Укажите число конфет для игры '
+                                              f'(по умолчанию - {init_count})', end='-')
             if count_candies is None: return None
 
             #   - сколько можно взять за раз, очевидно, что (can_removed < count_candies)
             frm = max(2, count_candies // 100 + 1)
             to = max(frm, (count_candies // 5 + 1))
             default = min(to, init_removed)
-            can_removed = myl.get_InputNumber(frm, to, default=default,
-                                              txt=f'Укажите сколько конфет можно брать '
-                                                  f'(по умолчанию - {default})', end='-')
+            can_removed = myl.get_input(frm, to, default=default,
+                                        txt=f'Укажите сколько конфет можно брать '
+                                            f'(по умолчанию - {default})', end='-')
             if can_removed is None: return None
 
         # Новый раунд
@@ -61,7 +61,7 @@ def init_game(init_count=None, init_removed=None, series=None, new_set=True):
         # Определим оптимальную для бота стратегию (1 - мягкая стратегия; 2 - гарантированная стратегия)
         bot_order = 1 if bot_code == prime_player else 2
         rem = count_candies % (can_removed + 1)
-        bot_strategy = 2 if (not rem and bot_order == 2) or (0 < rem < can_removed + 1 and  bot_order == 1) else 1
+        bot_strategy = 2 if (not rem and bot_order == 2) or (0 < rem < can_removed + 1 and bot_order == 1) else 1
 
         print(f'\nВсего в игре {count_candies} конфет')
         print(f'Ход осуществляется указанием числа конфет, которое игрок забирает со стола (не более {can_removed})')
@@ -70,15 +70,15 @@ def init_game(init_count=None, init_removed=None, series=None, new_set=True):
 
     else:
         # 1. Выбрать соперника ("0" - Bot; "2" - Human)
-        opp_code = myl.get_InputNumber((str(human_code), str(bot_code)), default=str(human_code), type_input=tuple,
-                                       txt=f'Выберите соперника ({human_code} - Human; {bot_code} - Bot), '
-                                           f'по умолчанию - {human_code}', end='-')
+        opp_code = myl.get_input((str(human_code), str(bot_code)), default=str(human_code), type_input=tuple,
+                                 txt=f'Выберите соперника ({human_code} - Human; {bot_code} - Bot), '
+                                     f'по умолчанию - {human_code}', end='-')
         if opp_code is None: return None
 
         opp_code = int(opp_code)
         other_player = {my_code: opp_code, opp_code: my_code}[my_code]
         players_game = {my_code: [other_player, 0], other_player: [my_code, 0]}
-        rnd = 0      # для учета числа раундов игры
+        rnd = 0                     # для учета числа раундов игры
         return rnd
 
 
@@ -94,7 +94,7 @@ def show_board(n_move, st):
 def get_move(player, st, go_last, mov):
 
     # "Мозги" (интеллект) Bot'а
-    def strategy_calc(m, n):
+    def strategy_bot(m, n):
         if bot_strategy == 1:                   # мягкая стратегия, когда отсутствует гарантированная
             delta = 1 if m < 2 * (n + 1) else 2
             take = int(max(1, m - ((m-delta-0.5)//n * n + delta))) if m > n else st
@@ -116,14 +116,14 @@ def get_move(player, st, go_last, mov):
         # где C - остаток конфет на столе; p - максимально количество, которое можно забрать за раз
         print(f'Ход {player_ref[player][2]} -> ... ', end='')
         time.sleep(bot_thinking)                # эмуляция времени "размышления" бота
-        go = strategy_calc(st, can_removed)
+        go = strategy_bot(st, can_removed)
         print(f'{go}')
 
     else:                                       # Играет соперник - человек
         go_default = min(st, can_removed, go_last[player] if len(go_last) > 1 else st)
-        go = myl.get_InputNumber(1, min(st, can_removed), default=go_default,
-                                 txt=f'Ход {player_ref[player][2]}. '
-                                     f'Сколько конфет снять (по умолчанию {go_default})?', end='-')
+        go = myl.get_input(1, min(st, can_removed), default=go_default,
+                           txt=f'Ход {player_ref[player][2]}. '
+                               f'Сколько конфет снять (по умолчанию {go_default})?', end='-')
 
     return go                   # отправка хода
 
@@ -251,6 +251,7 @@ while True:
         #    - провести сделанный ход, обновив остаток конфет
         move_last[current_player] = move
         status -= move
+
         #    - если на столе не осталось конфет - определить победителя (игрок сделавший ход последним) игра завершена.
         #    Сообщить о результате игры (п.7)
         #    иначе, устанавливаем текущего игрока и продолжаем игру (переход к п.4)

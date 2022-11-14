@@ -10,7 +10,7 @@ txt_code = '1 2 3 123456789 7'
 
 -----------------------------
 Есть множество вариантов реализации алгоритма сжатия RLE. Мне понравился этот
-(его немного я модифицировал, как понял сам, исходя из оcобенностей языка Python)
+(его немного я модифицировал, как понял сам, исходя из особенностей языка Python)
 Используемый алгоритм сжатия:
 -----------------------------
 Представляем все цепочки одинаковых символов собственно этим символом, а в служебном байте,
@@ -24,18 +24,20 @@ txt_code = '1 2 3 123456789 7'
 режима сжатия: 1 - включить режим сжатия, 0 - отключить режим сжатия
 -----------------------------
 """
-import my_Lib as my
+import my_lib as my
 
-count_max = 0  # максимальное количество символов в серии. 0 - не определено
+count_max = 0  # Максимальное количество символов в серии. 0 - не определено
 
 
 # Ввод задания на обработку данных
 def arc_task(no_help=None):
     if not no_help: arc_help()
-    print('\nEnter the task to the archiver according to the instructions (no option - exit):')
+    # print('\nEnter the task to the archiver according to the instructions (no option - exit):')
+    print('\nВведите задание для архиватора в соответствии с инструкцией.\n'
+          'Для вывода инструкции введите -[h]. Для отказа нажмите [Enter]):')
     while True:
-        opt, src, rcv = my.get_InputTuple(' - arc_option', ' - source', ' - receiver',
-                                          type_input=str, end='-', not_mess=True)
+        opt, src, rcv = my.get_inputs('-[arc_option]', '-[source]', '-[receiver]',
+                                      type_input=str, end='-', not_mess=True)
         if None in (opt, src, rcv):
             opt = None if opt is None or not opt[:2] in ('-h', '-q') else opt
             return opt, None, None
@@ -73,7 +75,7 @@ def arc_help():
 # Получить данные для сжатия / восстановления
 def get_data(option):
     return my.get_data_file(option) if not option == '-k' else \
-           my.get_InputNumber(txt='Введите текст для сжатия / восстановления', type_input=str)
+           my.get_input(txt='Введите текст для сжатия / восстановления', type_input=str)
 
 
 # Инициализация процессов сжатия и восстановления
@@ -124,7 +126,7 @@ def arc_compression(txt, show=None):
             count_series = 1
             continue
 
-        # Определение серии для тек. момента
+        # Определение серии для текущего момента
         series_type = series_type if series_type else 1 if smb == symbol_last else -1
 
         # Отработка для серии повторяющихся символов
@@ -217,19 +219,19 @@ while True:
             or arc_option == '-q':  # Выход
         break
 
-    if arc_option == '-h':  # Помощь (краткая инструкция)
+    if arc_option == '-h':          # Помощь (краткая инструкция)
         arc_help()
         continue
 
-    txt_source = get_data(source)  # Получить данные для обработки
+    txt_source = get_data(source)   # Получить данные для обработки
 
-    if txt_source is None: break  # Операция отменена или источник недоступен
+    if txt_source is None: break    # Операция отменена или источник недоступен
     res = None
-    if arc_option == '-a': res = arc_compression(txt_source, show=True)  # Сжатие данных файла
-    if arc_option == '-r': res = arc_recovery(txt_source)  # Восстановление данных из файла
+    if arc_option == '-a': res = arc_compression(txt_source, show=True)         # Сжатие данных файла
+    if arc_option == '-r': res = arc_recovery(txt_source)                       # Восстановление данных из файла
 
     if not (res is None):
         if receiver == '-c':
-            output_console(txt_source, res, arc_option)  # Вывод результата на консоль
+            output_console(txt_source, res, arc_option)                         # Вывод результата на консоль
         else:
-            my.wr_data_file(receiver, res, message='Данные записаны в файл')  # Запись результата в файл
+            my.wr_data_file(receiver, res, message='Данные записаны в файл')    # Запись результата в файл

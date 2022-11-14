@@ -5,7 +5,7 @@ Task-38_seminar.py:
 Напишите программу, удаляющую из текста все слова, содержащие "абв".
 test_data = [[["привет абв как абвышные дела?", "абв"], "привет как дела?"]]
 """
-import my_Lib as my
+import my_lib as my
 from functools import reduce
 
 is_fragment = lambda fr, s: s == s.replace(fr, '')
@@ -20,9 +20,9 @@ txt_test = 'привет абв как абвышные дела? абв'
 fragment_clr = 'абв'
 
 while True:
-    txt, fragment = my.get_InputTuple('Введите любой текст (или "*" для тестирования)',
-                                      'Введите фрагмент, слова содержащие который, нужно удалить',
-                                      type_input=str, end='-')
+    txt, fragment = my.get_input('Введите любой текст (или "*" для тестирования)',
+                                 'Введите фрагмент, слова содержащие который, нужно удалить',
+                                 type_input=str, end='-')
     if txt is None and my.check_exit(txt):
         break
 
@@ -62,9 +62,9 @@ test_txt = 'привет абв как абвышные дела? абв'
 clr_fragments = ['абв']
 
 while True:
-    params = my.get_InputTuple('Введите любой текст (или "*" для тестирования)',
-                               'Введите через запятую фрагменты, которые нужно удалить по всему тексту',
-                               type_input=str, end='-')
+    params = my.get_input('Введите любой текст (или "*" для тестирования)',
+                          'Введите через запятую фрагменты, которые нужно удалить по всему тексту',
+                          type_input=str, end='-')
 
     txt, fragments = (params + (None,))[:2]  # временная мера, пока библиотека my_lib не обновилась
 
@@ -76,7 +76,7 @@ while True:
     else:
         clr_fragments = fragments.split(',')
 
-    maxlen_fragment = reduce(lambda max_len, el: max(max_len, len(el)), clr_fragments, 0)
+    maxlen_fragment = reduce(lambda max_len, elem: max(max_len, len(elem)), clr_fragments, 0)
     txt_cleared = ""
     txt_rest = txt
 
