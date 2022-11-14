@@ -100,18 +100,18 @@ def is_winnings(board_st):
     # [41, 42, 43, 44]
     def diagonals(st, brd, sl):
         cnt_d = size_board - numb_XO + 1
-        if brd == 1:                # Диагонали начинаются с верхней границы поля
-            if sl == 1:             #   наклон - левый
-                res = reduce(lambda st_d, j: st_d + [[st[i-j][i]                  for i in range(j, size_board)]],
+        if brd == 1:                                    # Диагонали начинаются с верхней границы поля
+            if sl == 1:                                 #   наклон - левый
+                res = reduce(lambda st_d, j: st_d + [[st[i-j][i]                    for i in range(j, size_board)]],
                              range(0, cnt_d, 1), [])
-            else:                   #   наклон - правый (if sl == 2)
-                res = reduce(lambda st_d, j: st_d + [[st[i-j][(size_board-1) - i] for i in range(j, size_board)]],
+            else:                                       #   наклон - правый (if sl == 2)
+                res = reduce(lambda st_d, j: st_d + [[st[i-j][(size_board-1) - i]   for i in range(j, size_board)]],
                              range(0, cnt_d, 1), [])
-        else:                       # Диагонали заканчиваются на нижней границе поля (if brd == 2)
-            if sl == 1:             #   наклон - левый
+        else:                                           # Диагонали заканчиваются на нижней границе поля (if brd == 2)
+            if sl == 1:                                 #   наклон - левый
                 res = reduce(lambda st_d, j: st_d + [[st[i][(j+i)]                  for i in range(-j, size_board)]],
                              range(0, -cnt_d, -1), [])
-            else:                   #   наклон - правый (if sl == 2)
+            else:                                       #   наклон - правый (if sl == 2)
                 res = reduce(lambda st_d, j: st_d + [[st[i][(size_board-1) - (j+i)] for i in range(-j, size_board)]],
                              range(0, -cnt_d, -1), [])
         return res

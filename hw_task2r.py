@@ -15,7 +15,7 @@ import random
 import my_Lib as myl
 
 count_candies, can_removed, players_game = 0, 0, {}
-bot_thinking, bot_strategy = 2, None                # Бот будет "думать" 2 сек. Стратегию определим при инициации
+bot_thinking, bot_strategy = 3, None                # Бот будет "думать" 3 сек. Стратегию определим при инициации
 player_ref = {1: ('Вы', 'Вами', 'Ваш'),
               2: ('2-й Игрок', '2-м Игроком', '2-го Игрока'),
               0: ('Bot', 'Bot`ом', 'Bot`а')}
@@ -38,14 +38,14 @@ def init_game(init_count=None, init_removed=None, series=None, new_set=True):
         # Уточнение параметров игры:
         if new_set:
             #   - число конфет
-            count_candies = myl.get_InputNumber(100, 3117, default=init_count,
+            count_candies = myl.get_InputNumber(10, 3000, default=init_count,
                                                 txt=f'Укажите число конфет для игры '
                                                     f'(по умолчанию - {init_count})', end='-')
             if count_candies is None: return None
 
             #   - сколько можно взять за раз, очевидно, что (can_removed < count_candies)
-            frm = max(7, count_candies // 100 + 1)
-            to = max(frm, (count_candies // 10 + 1))
+            frm = max(2, count_candies // 100 + 1)
+            to = max(frm, (count_candies // 5 + 1))
             default = min(to, init_removed)
             can_removed = myl.get_InputNumber(frm, to, default=default,
                                               txt=f'Укажите сколько конфет можно брать '
@@ -93,8 +93,9 @@ def show_board(n_move, st):
 #    Проверить корректность хода. Если ход не корректен (количество в не допустимом диапазоне) повторить запрос.
 def get_move(player, st, go_last, mov):
 
+    # "Мозги" (интеллект) Bot'а
     def strategy_calc(m, n):
-        if bot_strategy == 1:                   # мягкая стратегия, когда гарантированная не сработает
+        if bot_strategy == 1:                   # мягкая стратегия, когда отсутствует гарантированная
             delta = 1 if m < 2 * (n + 1) else 2
             take = int(max(1, m - ((m-delta-0.5)//n * n + delta))) if m > n else st
             r = min(m, take)
@@ -110,22 +111,21 @@ def get_move(player, st, go_last, mov):
                 return n + 1 - p_last_opp
 
     if player == tuple(player_ref.keys())[2]:   # Играет Bot
-        # наделяем бота "интеллектом:"
+        # наделяем бота "интеллектом (мягкая стратегия, когда условия для гарантированной стратегии не выполняются):"
         # для выигрыша количество конфет, которое необходимо забирать => T = max(1, C - (C//p * p + 1))
-        # де C - остаток конфет на столе; p - максимально количество, которое можно забрать за раз
+        # где C - остаток конфет на столе; p - максимально количество, которое можно забрать за раз
         print(f'Ход {player_ref[player][2]} -> ... ', end='')
         time.sleep(bot_thinking)                # эмуляция времени "размышления" бота
         go = strategy_calc(st, can_removed)
-
         print(f'{go}')
 
-    else:
+    else:                                       # Играет соперник - человек
         go_default = min(st, can_removed, go_last[player] if len(go_last) > 1 else st)
         go = myl.get_InputNumber(1, min(st, can_removed), default=go_default,
                                  txt=f'Ход {player_ref[player][2]}. '
                                      f'Сколько конфет снять (по умолчанию {go_default})?', end='-')
 
-    return go  # отправка хода
+    return go                   # отправка хода
 
 
 # 6. Обработать ход:
@@ -212,8 +212,8 @@ b) Думка как наделить бота "интеллектом".
 Количество конфет, которое необходимо забирать => T = max(1, C - (C//p * p + 1))    
 '''
 
-def_count_candies = 2021    # Начальное число конфет
-def_can_take = 28           # можно забрать за один раз (не более чем)).
+def_count_candies = 2021                # Начальное число конфет
+def_can_take = 28                       # можно забрать за один раз (не более чем)).
 
 # 1, 2 Инициация серии раундов игры:
 print('Игра НИМ - "Конфетки"')
@@ -267,6 +267,7 @@ while True:
             n_games += 1
             players_game[result][1] += 1
             show_account(moves, result, status)
+
             # 8. уточнить о следующем раунде игры.
             #    "Еще раз?": - если да - переход на шаг-2; если нет - завершить игру.
             special = 'NnТт'
